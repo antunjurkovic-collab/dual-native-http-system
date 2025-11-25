@@ -31,9 +31,26 @@ coverage/
 # Build artifacts
 *.phar
 
-# Refactoring scripts (one-time use)
-refactor.php
-complete-refactoring.php
-fix-syntax.php
-fix-all-syntax.php
-final-fix.php
+# Refactoring/temporary scripts
+refactor*.php
+fix-*.php
+complete-*.php
+final-*.php
+*-tester.php
+ci-tester.php
+
+# Temporary documentation
+MANUAL-*.md
+PRE-PACKAGIST-*.md
+REFACTORING-*.md
+PUBLISHED-*.md
+ROADMAP.md
+examples.md
+
+# Legacy files
+DualNativeHTTPSystem.php
+dual-native-http-system.php
+
+# Temporary directories
+profiles/
+scripts/
