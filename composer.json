@@ -1,6 +1,6 @@
 {
     "name": "dual-native/http-system",
-    "description": "Dual-Native HTTP System for WordPress and general use",
+    "description": "Framework-agnostic PHP library implementing the Dual-Native Pattern with CID validation, bidirectional linking, and zero-fetch optimization",
     "type": "library",
     "license": "GPL-2.0-or-later",
     "authors": [
@@ -25,6 +25,18 @@
             "DualNative\\HTTP\\Tests\\": "tests/"
         }
     },
+    "keywords": [
+        "dual-native",
+        "content-identity",
+        "cid",
+        "etag",
+        "cache",
+        "http",
+        "rest-api",
+        "wordpress",
+        "framework-agnostic",
+        "optimistic-concurrency"
+    ],
     "config": {
         "sort-packages": true
     }
