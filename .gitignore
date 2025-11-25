@@ -1,0 +1,39 @@
+# Dependencies
+/vendor/
+
+# PHPUnit
+.phpunit.cache/
+.phpunit.result.cache
+phpunit.xml
+
+# Composer
+composer.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+*.log
+
+# Testing
+coverage/
+
+# Build artifacts
+*.phar
+
+# Refactoring scripts (one-time use)
+refactor.php
+complete-refactoring.php
+fix-syntax.php
+fix-all-syntax.php
+final-fix.php
