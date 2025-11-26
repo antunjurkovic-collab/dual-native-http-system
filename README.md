@@ -4,7 +4,9 @@
 [![PHP Version](https://img.shields.io/packagist/php-v/dual-native/http-system)](https://packagist.org/packages/dual-native/http-system)
 [![License](https://img.shields.io/packagist/l/dual-native/http-system)](https://packagist.org/packages/dual-native/http-system)
 
-A **framework-agnostic PHP library** implementing the Dual-Native Pattern for synchronized Human Representation (HR) and Machine Representation (MR) content delivery with Content Identity (CID) validation, bidirectional linking, and zero-fetch optimization.
+A **framework-agnostic PHP library** implementing the [Dual-Native Pattern](https://github.com/dual-native) for synchronized Human Representation (HR) and Machine Representation (MR) content delivery with Content Identity (CID) validation, bidirectional linking, and zero-fetch optimization.
+
+This library implements the Dual-Native Pattern as defined in the **Dual-Native Core Specification** and **Whitepaper**, providing a production-ready implementation of the 5 pillars: Resource Identity (RID), Content Identity (CID), Bidirectional Linking, Semantic Equivalence, and Cataloging & Discovery.
 
 ## Features
 
@@ -140,6 +142,8 @@ $system = new DualNativeSystem(
 ```
 
 ## Core Concepts
+
+This library provides the business logic for the Dual-Native Pattern. When used in HTTP contexts, CIDs map to **ETags** for conditional requests (`If-Match`, `If-None-Match`), enabling **304 Not Modified** responses for unchanged resources and **412 Precondition Failed** for conflicting writes. See the [WordPress plugin](https://github.com/antunjurkovic-collab/wp-dual-native) for a complete HTTP implementation example.
 
 ### Content Identity (CID)
 
@@ -302,35 +306,153 @@ vendor/bin/phpunit
 
 ### DualNativeSystem
 
+#### Constructor
+
 ```php
-// Constructor
 new DualNativeSystem(
     array $config = [],
     ?EventDispatcherInterface $eventDispatcher = null,
     ?StorageInterface $storage = null
 )
+```
 
-// Content Identity
+#### Content Identity
+
+```php
+// Compute CID for content
 $system->computeCID($content, ?array $excludeKeys = null): string
+// Returns: 'sha256-<hex>'
+
+// Validate CID matches content
 $system->validateCID($content, string $expectedCID, ?array $excludeKeys = null): bool
+// Returns: true if CID matches, false otherwise
+```
 
-// Resource Management
+#### Resource Management
+
+```php
+// Create a dual-native resource
 $system->createResource(string $rid, $hr, $mr, array $metadata = []): array
+// Returns:
+// [
+//   'rid' => 'resource-123',
+//   'cid' => 'sha256-...',
+//   'hr' => [...],
+//   'mr' => [...],
+//   'links' => ['hr' => [...], 'mr' => [...]],
+//   'catalog_updated' => true
+// ]
+
+// Get resource by RID
 $system->getResource(string $rid): ?array
+// Returns: resource array or null if not found
+// [
+//   'rid' => 'resource-123',
+//   'hr' => ['url' => '...'],
+//   'mr' => ['api_url' => '...', 'content_id' => '...'],
+//   'cid' => 'sha256-...',
+//   'updatedAt' => '2024-01-01T00:00:00Z'
+// ]
+
+// Update resource with CID validation (safe write)
 $system->updateResource(string $rid, $newData, string $expectedCid): array
+// Returns on success:
+// [
+//   'success' => true,
+//   'rid' => 'resource-123',
+//   'new_cid' => 'sha256-...',
+//   'resource' => [...]
+// ]
+// Returns on failure (CID mismatch):
+// [
+//   'success' => false,
+//   'error' => 'CID mismatch - resource has been modified by another process',
+//   'rid' => 'resource-123',
+//   'expected_cid' => 'sha256-abc...',
+//   'actual_cid' => 'sha256-xyz...'
+// ]
+```
 
-// Catalog
+#### Catalog
+
+```php
+// Get catalog of resources
 $system->getCatalog(?string $since, array $filters, int $limit, int $offset): array
+// Returns:
+// [
+//   'count' => 42,
+//   'items' => [
+//     ['rid' => '...', 'cid' => '...', 'updatedAt' => '...', ...],
+//     ...
+//   ]
+// ]
+```
 
-// Links
+#### Links
+
+```php
+// Generate bidirectional links
 $system->generateLinks(string $rid, string $hrUrl, string $mrUrl): array
+// Returns:
+// [
+//   'hr' => ['url' => '...', 'rel' => 'self', 'type' => 'text/html'],
+//   'mr' => ['url' => '...', 'rel' => 'alternate', 'type' => 'application/json']
+// ]
+```
 
-// Validation
+#### Validation
+
+```php
+// Validate semantic equivalence between HR and MR
 $system->validateSemanticEquivalence($hrContent, $mrContent, ?array $scope): array
-$system->validateConformance(array $systemInfo): array
+// Returns:
+// [
+//   'equivalent' => true,
+//   'differences' => [],
+//   'scope' => ['title', 'body', 'author']
+// ]
+// Or on mismatch:
+// [
+//   'equivalent' => false,
+//   'differences' => ['title' => ['hr' => 'Title A', 'mr' => 'Title B']],
+//   'scope' => ['title', 'body', 'author']
+// ]
 
-// Health
+// Validate system conformance to dual-native standards
+$system->validateConformance(array $systemInfo): array
+// Returns:
+// [
+//   'conformant' => true,
+//   'level' => 2,  // Conformance level (1-4)
+//   'checks' => [
+//     'has_rid' => true,
+//     'has_cid' => true,
+//     'has_bidirectional_links' => true,
+//     'has_catalog' => true
+//   ],
+//   'issues' => []
+// ]
+```
+
+#### Health Check
+
+```php
+// Perform system health check
 $system->healthCheck(): array
+// Returns:
+// [
+//   'status' => 'healthy',  // 'healthy' or 'degraded'
+//   'timestamp' => '2024-01-01T00:00:00+00:00',
+//   'version' => '1.0.0',
+//   'components' => [
+//     'cid_manager' => true,
+//     'link_manager' => true,
+//     'catalog_manager' => true,
+//     'validation_engine' => true,
+//     'http_handler' => true
+//   ],
+//   'profile' => 'full'
+// ]
 ```
 
 ## Configuration
@@ -398,4 +520,4 @@ Developed by the Dual-Native Team
 ## Support
 
 - **Issues**: [GitHub Issues](https://github.com/antunjurkovic-collab/dual-native-http-system/issues)
-- **Email**: info@dual-native.org
+- **Email**: antunjurkovic@gmail.com
